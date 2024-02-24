@@ -2,7 +2,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from multiprocessing import Process
+from threading import Thread
 
 CYRILLIC_SYMBOLS = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяєіїґ"
 TRANSLATION = (
@@ -77,10 +77,14 @@ def clean(source):
             if name in dirs:
                 dirs.remove(name)
 
+        threads = []
+
         for dir in dirs:
-            p = Process(target=move_files, args=(os.path.join(root, dir), source))
-            p.start()
-            p.join()
+            thread = Thread(target=move_files, args=(os.path.join(root, dir), source))
+            thread.start()
+            threads.append(thread)
+
+        [el.join() for el in threads]
 
 
 def sort(path):
